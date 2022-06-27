@@ -4,11 +4,15 @@ import json
 from utilities.send_email import SendEmail
 from utilities.customLogger import LogGen
 import time
+import os
+from dotenv import load_dotenv
+
 
 percent_diff_cutoff = 10
 sleep_time_min = 6
 old_price = None
 
+load_dotenv()
 logger = LogGen.loggen()
 
 url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
@@ -18,8 +22,9 @@ parameters = {
 }
 headers = {
     'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': 'a3d26b98-4f21-4fcf-9cbb-80dcb64346e3',
+    'X-CMC_PRO_API_KEY': os.getenv("COIN_MARKETCAP_API_KEY"),
 }
+print(os.getenv("COIN_MARKETCAP_API_KEY"))
 
 
 while True:
@@ -55,11 +60,8 @@ while True:
                                    body=f'Bro.... Populous just went up {percent_difference}% within the last '
                                         f'{sleep_time_min} minutes. You better check that shit out and sell')
             send_email.send_email()
-
-    except (ConnectionError, Timeout, TooManyRedirects) as e:
-        logger.error(f'Some request error occured: {e}')
     except Exception as e:
-        logger.error(f'Some other error occured: {e}')
+        logger.exception(e)
 
     time.sleep(sleep_time_min * 60)
     old_price = current_price
@@ -75,12 +77,3 @@ app_log = logging.getLogger('root')
 app_log.setLevel(logging.INFO)
 
 app_log.addHandler(my_handler)
-
-
-
-
-
-
-
-
-
